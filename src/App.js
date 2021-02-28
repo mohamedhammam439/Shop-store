@@ -1,25 +1,126 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import data from "./data.json";
+import "./App.css";
+import Products from "./components/Products";
+import Filter from "./components/Filter";
+import Cart from "./components/Cart";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class App extends React.Component {
+  constructor() {
+    super();
+    this.state = {
+      products: data.products,
+      cartItems: localStorage.getItem("cartItem")
+        ? JSON.parse(localStorage.getItem("cartItem"))
+        : [],
+      size: "",
+      sort: "",
+    };
+  }
+
+  removeItem = (product) => {
+    const cartItems = this.state.cartItems.slice();
+    const removed = cartItems.filter((x) => x._id !== product._id);
+    this.setState({ cartItems: removed });
+
+    // to save data after reloading
+    localStorage.setItem("cartItem", JSON.stringify(removed));
+  };
+
+  // to save order into data base must be in main comp
+  createOrder = (order) => {
+    alert("need to save order for" + order.name);
+  };
+
+  addToCart = (product) => {
+    const cartItems = this.state.cartItems.slice();
+    let alreadyInCart = false;
+    cartItems.forEach((item) => {
+      if (item._id === product._id) {
+        item.count ++ ;
+        alreadyInCart = true;
+
+      }
+    });
+    if (!alreadyInCart) {
+      cartItems.push({ ...product, count: 1 });
+    }
+    this.setState({ cartItems });
+
+    // to save data after reloading
+    localStorage.setItem("cartItem", JSON.stringify(cartItems));
+  };
+
+  sortProduct = (e) => {
+    const sort = e.target.value;
+    console.log(e.target.value);
+    this.setState((state) => ({
+      sort: sort,
+      products: this.state.products
+        .slice()
+        .sort((a, b) =>
+          sort === "lowest"
+            ? a.price > b.price
+              ? 1
+              : -1
+            : sort === "highest"
+            ? a.price < b.price
+              ? 1
+              : -1
+            : a._id < b._id
+            ? 1
+            : -1
+        ),
+    }));
+  };
+  filterProduct = (e) => {
+    // console.log(e.target.value);
+    const filter = e.target.value;
+    if (filter === "ALL") {
+      this.setState({ size: filter, products: data.products });
+    } else {
+      this.setState({
+        size: filter,
+        products: data.products.filter(
+          (product) => product.availableSizes.indexOf(filter) >= 0
+        ),
+      });
+    }
+  };
+  render() {
+    return (
+      <div className="grid-container">
+        <header>
+          <a href="/">Tasty Burger</a>
+        </header>
+        <main>
+          <div className="content">
+            <div className="main">
+              <Filter
+                count={this.state.products.length}
+                size={this.state.size}
+                sort={this.state.sort}
+                sortProduct={this.sortProduct}
+                filterProduct={this.filterProduct}
+              />
+              <Products
+                products={this.state.products}
+                addToCart={this.addToCart}
+              />
+            </div>
+            <div className="sidebar">
+              <Cart
+                cartItems={this.state.cartItems}
+                removeItem={this.removeItem}
+                createOrder={this.createOrder}
+              />
+            </div>
+          </div>
+        </main>
+        <footer>All Right Reseved</footer>
+      </div>
+    );
+  }
 }
 
 export default App;
