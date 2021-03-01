@@ -18,19 +18,6 @@ class App extends React.Component {
     };
   }
 
-  removeItem = (product) => {
-    const cartItems = this.state.cartItems.slice();
-    const removed = cartItems.filter((x) => x._id !== product._id);
-    this.setState({ cartItems: removed });
-
-    // to save data after reloading
-    localStorage.setItem("cartItem", JSON.stringify(removed));
-  };
-
-  // to save order into data base must be in main comp
-  createOrder = (order) => {
-    alert("need to save order for" + order.name);
-  };
 
   addToCart = (product) => {
     const cartItems = this.state.cartItems.slice();
@@ -53,7 +40,7 @@ class App extends React.Component {
 
   sortProduct = (e) => {
     const sort = e.target.value;
-    console.log(e.target.value);
+    // console.log(e.target.value);
     this.setState((state) => ({
       sort: sort,
       products: this.state.products
@@ -73,6 +60,7 @@ class App extends React.Component {
         ),
     }));
   };
+  
   filterProduct = (e) => {
     // console.log(e.target.value);
     const filter = e.target.value;
